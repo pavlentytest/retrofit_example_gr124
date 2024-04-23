@@ -9,6 +9,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.myapplication.databinding.ActivityMainBinding
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.get
+import io.ktor.serialization.gson.gson
+import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Retrofit
@@ -31,6 +39,7 @@ class MainActivity : AppCompatActivity() {
             .build()
         api = retrofit.create(Yandex::class.java)
 
+        doKtorClient()
         binding.editText.addTextChangedListener(object: TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
 
@@ -57,6 +66,21 @@ class MainActivity : AppCompatActivity() {
                 Log.d("RRR",p1.message.toString())
             }
         })
+    }
+
+    fun doKtorClient() {
+        val client = HttpClient {
+            install(ContentNegotiation) {
+                json()
+            }
+        }
+        GlobalScope.launch {
+            val httpClient = client.get("https://predictor.yandex.net/api/v1/predict.json/complete?key=$KEY&q=moscow&lang=$LANG&limit=$LIMIT")
+            val body: Response = httpClient.body()
+            Log.d("RRR",body.toString())
+        }
+
+
     }
 
     companion object {
